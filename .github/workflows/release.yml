@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run premake
+      uses: eariassoto/setup-premake@v1
+      with:
+        version: '5.0.0-beta1'
+        action: 'vs2022'
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Build solution
+      run: msbuild ./build/megu-memleakfix.sln /p:Configuration=Release /p:Platform=Win32
+
+    - name: Make release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "Latest Build"
+          files: |
+            ./bin/Release/*.asi
